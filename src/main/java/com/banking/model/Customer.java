@@ -138,13 +138,16 @@ public class Customer extends BaseEntity{
     }
 
     public CustomerDTO toCustomerDTO () {
+
         CustomerDTO customerDTO = new CustomerDTO();
+
         customerDTO.setId(this.getId());
         customerDTO.setFullName(this.fullName);
         customerDTO.setEmail(this.email);
         customerDTO.setAddress(this.address);
         customerDTO.setPhone(this.phone);
         customerDTO.setBalance(this.balance);
+
         return customerDTO;
     }
 }

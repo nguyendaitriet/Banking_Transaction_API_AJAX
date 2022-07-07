@@ -66,17 +66,17 @@
             type: "GET",
             url: "http://localhost:8080/api/customers/list"
         })
-            .done((data) => {
-                customers = data;
-                $.each(data, (i, item) => {
+        .done((data) => {
+            customers = data;
+            $.each(data, (i, item) => {
 
-                    let str = getRow(item);
-                    $("#tbCustomer tbody").prepend(str);
+                let str = getRow(item);
+                $("#tbCustomer tbody").prepend(str);
 
-                    handleRowBtn();
+                handleRowBtn();
 
-                });
-            })
+            });
+        })
     }
 
     $("#btnCreate").on("click", () => {
@@ -139,7 +139,6 @@
             else {
                 let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
             }
-
         })
     }
 
@@ -185,8 +184,19 @@
 
             console.log(jqXHR);
 
-            $("#mdEdit .modal-alert-danger").removeClass('hide').addClass('show');
-            $("#mdEdit .modal-alert-danger").html(`<lable class="error">${jqXHR.responseText}</lable>`)
+            let str='';
+
+            if (jqXHR.responseJSON) {
+                $.each(jqXHR.responseJSON, (key,value) => {
+                    str += `<label id="${key}-error" class="error" for="${key}Up">${value}</label>`
+                })
+
+                $("#mdEdit .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
+            else {
+                let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
+                $("#mdEdit .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
         })
     }
 
@@ -199,30 +209,16 @@
     function doDeposit() {
 
         let transactionAmount = +$("#amountDep").val();
-
-        delete newDeposit.id;
-        newDeposit.customerId = +customer.id;
-        newDeposit.createdAt = getDateTime();
-        newDeposit.updatedAt = getDateTime();
-        newDeposit.createdBy = 1;
-        newDeposit.updatedBy = 1;
         newDeposit.transactionAmount = transactionAmount;
 
         $.ajax({
-            type: "POST",
-            url: "http://localhost:3000/deposits/",
-            data: newDeposit
-        })
-            .fail((err) => {
-                alert("Failed operation!");
-            })
-
-        customer.balance = Number.parseInt(customer.balance) + transactionAmount;
-
-        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
             type: "PUT",
-            url: "http://localhost:3000/customers/" + customer.id,
-            data: customer
+            url: "http://localhost:8080/api/deposits/" + customer.id,
+            data: JSON.stringify(newDeposit)
         })
         .done((data) => {
 
@@ -231,12 +227,31 @@
 
             handleRowBtn();
 
-            // $("#mdDeposit").modal("hide");
+            $("#mdDeposit").modal("hide");
+
+
+
             showSuccessMessage();
 
         })
-        .fail((err) => {
-            alert("Failed operation!");
+        .fail((jqXHR) => {
+
+            console.log(jqXHR);
+
+            let str='';
+
+            if (jqXHR.responseJSON) {
+                $.each(jqXHR.responseJSON, (key,value) => {
+                    str += `<label id="${key}-error" class="error" for="${key}Dep">${value}</label>`
+                })
+
+                $("#mdDeposit .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
+            else {
+                let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
+                $("#mdDeposit .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
+
         })
     }
 
@@ -396,25 +411,25 @@
             url: "http://localhost:3000/transfers",
             data: newTransfer
         })
-            .fail((err) => {
-                alert("Failed to create transfer!");
-            })
+        .fail((err) => {
+            alert("Failed to create transfer!");
+        })
 
     }
 
 
     $("#btnSuspend").on("click", () => {
 
-        customer.deleted = 1;
+        // customer.deleted = 1;
 
         $.ajax({
-            headers: {
-                "accept": "application/json",
-                "content-type": "application/json"
-            },
-            type: "PUT",
-            url: "http://localhost:8080/api/customers/suspend/" + customer.id,
-            data: JSON.stringify(customer)
+            // headers: {
+            //     "accept": "application/json",
+            //     "content-type": "application/json"
+            // },
+            type: "GET",
+            url: "http://localhost:8080/api/customers/suspend/" + customer.id
+            // data: JSON.stringify(customer)
         })
         .done((data) => {
             let currentRow = $("#tr_" + data.id);
@@ -663,7 +678,6 @@
                 email: true,
                 minlength: 10,
                 maxlength: 50,
-                // emailNotExist: true
             },
             address: {
                 required: false,
@@ -675,7 +689,6 @@
                 phonePattern: true,
                 minlength: 9,
                 maxlength: 20,
-                // phoneNotExist: true
             }
         },
         messages: {
@@ -733,8 +746,7 @@
         //         required: true,
         //         email: true,
         //         minlength: 10,
-        //         maxlength: 50,
-        //         emailUpdateNotExist: true
+        //         maxlength: 50
         //     },
         //     address: {
         //         required: false,
@@ -745,8 +757,7 @@
         //         required: true,
         //         phonePattern: true,
         //         minlength: 9,
-        //         maxlength: 20,
-        //         phoneNotExist: true
+        //         maxlength: 20
         //     }
         // },
         // messages: {
@@ -790,37 +801,40 @@
     });
 
     $('#frmDeposit').validate({
-        rules: {
-            amountDep:{
-                required: true,
-                number: true,
-                min: 100,
-                max: 20000000,
-                maxlength: 12
-            }
-        },
-        messages: {
-            amountDep:{
-                required: "Transaction amount must NOT be empty.",
-                number: "Invalid transaction amount.",
-                min: $.validator.format("Transaction amount must NOT be less than {0}."),
-                max: $.validator.format("Transaction amount must NOT be greater than {0}."),
-                maxlength: $.validator.format("Max character of transaction amount: {0}.")
-            }
-        },
-        errorLabelContainer: '#mdDeposit .modal-alert-danger',
-        errorPlacement: function(error, element){
-            error.appendTo("#mdDeposit .modal-alert-danger").removeClass('hide').addClass('show');
-        },
-        showErrors: function(errorMap, errorList) {
-            if (this.numberOfInvalids() > 0) {
-                $("#mdDeposit .modal-alert-danger").removeClass('hide').addClass('show');
-            } else {
-                $("#mdDeposit .modal-alert-danger").removeClass('show').addClass('hide').empty();
-                $("#frmDeposit input.error").removeClass("error");
-            }
-            this.defaultShowErrors();
-        },
+        onkeyup: function(element) { $(element).valid() },
+        onclick: false,
+        onfocusout: false,
+        // rules: {
+        //     amountDep:{
+        //         required: true,
+        //         number: true,
+        //         min: 100,
+        //         max: 20000000,
+        //         maxlength: 12
+        //     }
+        // },
+        // messages: {
+        //     amountDep:{
+        //         required: "Transaction amount must NOT be empty.",
+        //         number: "Invalid transaction amount.",
+        //         min: $.validator.format("Transaction amount must NOT be less than {0}."),
+        //         max: $.validator.format("Transaction amount must NOT be greater than {0}."),
+        //         maxlength: $.validator.format("Max character of transaction amount: {0}.")
+        //     }
+        // },
+        // errorLabelContainer: '#mdDeposit .modal-alert-danger',
+        // errorPlacement: function(error, element){
+        //     error.appendTo("#mdDeposit .modal-alert-danger").removeClass('hide').addClass('show');
+        // },
+        // showErrors: function(errorMap, errorList) {
+        //     if (this.numberOfInvalids() > 0) {
+        //         $("#mdDeposit .modal-alert-danger").removeClass('hide').addClass('show');
+        //     } else {
+        //         $("#mdDeposit .modal-alert-danger").removeClass('show').addClass('hide').empty();
+        //         $("#frmDeposit input.error").removeClass("error");
+        //     }
+        //     this.defaultShowErrors();
+        // },
         submitHandler: function() {
             doDeposit();
         }
@@ -938,55 +952,6 @@
     $.validator.addMethod("maximumWithdrawAmount", function(value, element) {
         return this.optional(element) || (parseInt(value) <= customer.balance);
     }, "Withdraw Amount must NOT be greater than balance.");
-
-    // $.validator.addMethod("emailNotExist", function(value, element) {
-    //         findAllCustomers();
-    //         let currentCustomer = customers.find(x => x.email == value.trim());
-    //         return this.optional(element) || (currentCustomer == undefined);
-    //     },
-    //     "Email address exists."
-    // )
-
-
-    // let check;
-    //
-    // function checkEmailExist(email) {
-    //     return $.ajax({
-    //         type: "GET",
-    //         url: "http://localhost:8080/api/customers/checkEmail/" + email
-    //     })
-    // }
-    //
-    // $.validator.addMethod("emailNotExist", function(value, element) {
-    //         alert(JSON.stringify(checkEmailExist(value)));
-    //         return this.optional(element) || !checkEmailExist(value);
-    //     },
-    //     "Email address exists."
-    // )
-
-    $.validator.addMethod("emailUpdateNotExist", function(value, element) {
-            findAllCustomers();
-            let currentCustomer = customers.find(x => x.email == value.trim() && x.id != customer.id);
-            return this.optional(element) || (currentCustomer == undefined);
-        },
-        "Email address exists."
-    )
-
-    // $.validator.addMethod("phoneNotExist", function(value, element) {
-    //         findAllCustomers();
-    //         let currentCustomer = customers.find(x => x.phone == value.trim());
-    //         return this.optional(element) || (currentCustomer == undefined);
-    //     },
-    //     "Phone number exists."
-    // )
-
-    $.validator.addMethod("phoneNotExist", function(value, element) {
-            findAllCustomers();
-            let currentCustomer = customers.find(x => x.phone == value.trim() && x.id != customer.id);
-            return this.optional(element) || (currentCustomer == undefined);
-        },
-        "Phone number exists."
-    )
 
     $.validator.addMethod("recipientIdExits", function(value, element) {
             let recipientList = getRecipients(customer.id);

@@ -75,7 +75,4 @@ public class CustomerService implements ICustomerService{
         customerRepository.suspendCustomer(id);
     }
 
-
-
-
 }

@@ -100,4 +100,16 @@ public class CustomerDTO {
         customer.setEmail(this.email);
         return customer;
     }
+
+    @Override
+    public String toString() {
+        return "CustomerDTO{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                ", balance=" + balance +
+                '}';
+    }
 }

@@ -1,13 +1,16 @@
 package com.banking.controller.rest;
 
+import com.banking.exception.DataInputEmailExist;
 import com.banking.model.dto.CustomerDTO;
 import com.banking.model.Customer;
 import com.banking.service.CustomerService;
+import com.banking.util.AppUtils;
 import com.banking.util.ParsingValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +20,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerRestController {
+
+    @Autowired
+    private AppUtils appUtils;
 
     @Autowired
     private CustomerService customerService;
@@ -47,11 +53,11 @@ public class CustomerRestController {
 
         //Gather all responses and show on view
         if (emailExits) {
-            errors.put("email","Email address exists.");
+            errors.put("email", "Email address exists.");
         }
 
         if (phoneExists) {
-            errors.put("phone","Phone number exists.");
+            errors.put("phone", "Phone number exists.");
         }
 
         if (errors.isEmpty()) {
@@ -85,39 +91,67 @@ public class CustomerRestController {
                                             @Validated @RequestBody CustomerDTO customerDTO,
                                             BindingResult bindingResult) {
 
+
         if (ParsingValidationUtils.isLongParsable(id)) {
             long validId = Long.parseLong(id);
             Optional<Customer> customerExists = customerService.findById(validId);
 
             if (customerExists.isPresent()) {
 
-                if (!bindingResult.hasErrors()) {
+//                if (!bindingResult.hasErrors()) {
 
-                    boolean emailUpdateExits = customerService.existsByEmailAndIdIsNot(customerExists.get().getEmail(), validId);
-                    boolean phoneUpdateExists = customerService.existsByPhoneAndIdIsNot(customerExists.get().getPhone(), validId);
+//                    Map<String, String> errors = new HashMap<>();
 
-                    Customer customer = customerDTO.toCustomer();
+                    boolean emailUpdateExits = customerService.existsByEmailAndIdIsNot(customerDTO.getEmail(), validId);
+                    boolean phoneUpdateExists = customerService.existsByPhoneAndIdIsNot(customerDTO.getPhone(), validId);
 
-                    customer.setId(customerExists.get().getId());
-                    customer.setBalance(customerExists.get().getBalance());
 
-                    customerService.save(customer);
+                    if (emailUpdateExits) {
+//                       throw new DataInputEmailExist("Email address exist.");
+                        bindingResult.addError(new ObjectError("email", "Email address exist."));
+                    }
 
-                    customerDTO = customer.toCustomerDTO();
+                    if (phoneUpdateExists) {
+//                        errors.put("phone", "Phone number exists.");
+                        bindingResult.addError(new ObjectError("phone", "Phone number exist."));
+                    }
 
-                    return new ResponseEntity<>(customerDTO, HttpStatus.OK);
+//                    if (errors.isEmpty()) {
 
+                    if (!bindingResult.hasErrors()) {
+
+                        try {
+
+                            Customer customer = customerDTO.toCustomer();
+
+                            customer.setId(customerExists.get().getId());
+                            customer.setBalance(customerExists.get().getBalance());
+
+                            customerService.save(customer);
+
+                            customerDTO = customer.toCustomerDTO();
+
+                            return new ResponseEntity<>(customerDTO, HttpStatus.OK);
+
+                        } catch (Exception e) {
+
+                            return new ResponseEntity<>("Process failed.", HttpStatus.INTERNAL_SERVER_ERROR);
+                        }
+                    }
+
+//                    return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+
+                    return appUtils.mapError(bindingResult);
                 }
 
-                return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
-
-            }
+//                return appUtils.mapError(bindingResult);
+//            }
         }
 
         return new ResponseEntity<>("Customer ID doesn't exist.", HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping("/suspend/{id}")
+    @GetMapping("/suspend/{id}")
     public ResponseEntity<?> suspendCustomer(@PathVariable String id) {
         if (ParsingValidationUtils.isLongParsable(id)) {
             long validId = Long.parseLong(id);
@@ -125,8 +159,7 @@ public class CustomerRestController {
 
             if (customerExists.isPresent()) {
                 customerService.suspendCustomer(validId);
-                return new ResponseEntity<>(HttpStatus.OK);
-
+                return new ResponseEntity<>(customerExists.get(), HttpStatus.OK);
             }
         }
 
