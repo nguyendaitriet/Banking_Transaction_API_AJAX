@@ -1,0 +1,35 @@
+table thead tr {
+    background-color: rgb(42, 190, 69);
+    color: white;
+}
+
+.table-hover>tbody>tr:hover {
+    background-color: rgba(159, 159, 159, 0.339);
+    color: rgb(0, 0, 0);
+}
+
+.modal-alert-danger {
+    padding: 10px 35px;
+    margin-bottom: 15px;
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+.show {
+    display: block !important;
+}
+
+.hide {
+    display: none;
+}
+
+label.error {
+    display: list-item;
+    margin-top: 5px;
+    color: #842029;
+}
+
+input.error {
+    border: 1px solid red;
+}

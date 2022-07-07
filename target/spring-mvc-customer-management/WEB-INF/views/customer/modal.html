@@ -1,0 +1,261 @@
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="modal_create">
+    <div class="modal fade" tabindex="-1" id="mdCreate" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Create Customer</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert-danger hide">
+                    </div>
+                    <form class="mb-3" autocomplete="off" id="frmCreate">
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullNameCre" name="fullName" class="form-control">
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="email">Email</label>
+                                <input type="text" id="emailCre" name="email" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-xl-6">
+                                <label for="phone">Phone Number</label>
+                                <input type="text" id="phoneCre" name="phone" class="form-control">
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="address">Address</label>
+                                <input type="text" id="addressCre" name="address" class="form-control">
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="btnCreate" type="button" class="btn btn-outline-primary">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="modal_edit">
+    <div class="modal fade" tabindex="-1" id="mdEdit" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Update Customer</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert-danger hide">
+                    </div>
+                    <form class="mb-3" autocomplete="off" id="frmEdit">
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullNameUp" name="fullName" class="form-control">
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="email">Email</label>
+                                <label for="emailUp"></label><input type="text" id="emailUp" name="email" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-xl-6">
+                                <label for="phone">Phone Number</label>
+                                <label for="phoneUp"></label><input type="text" id="phoneUp" name="phone" class="form-control">
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="address">Address</label>
+                                <label for="addressUp"></label><input type="text" id="addressUp" name="address" class="form-control">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="btnEdit" type="button" class="btn btn-outline-info">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="modal_deposit">
+    <div class="modal fade" tabindex="-1" id="mdDeposit" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Deposit</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert-danger hide">
+                    </div>
+                    <form class="mb-3" autocomplete="off" id="frmDeposit">
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullNameDep" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="email">Email</label>
+                                <input type="text" id="emailDep" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-xl-6">
+                                <label for="phone">Balance</label>
+                                <input type="text" id="balanceDep" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="address">Transaction Amount</label>
+                                <input type="text" id="amountDep" name="amountDep" class="form-control num-space valid">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="btnDeposit" type="button" class="btn btn-outline-success">Deposit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="modal_withdraw">
+    <div class="modal fade" tabindex="-1" id="mdWithdraw" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Withdraw</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert-danger hide">
+                    </div>
+                    <form class="mb-3" autocomplete="off" id="frmWithdraw">
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullNameWit" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="email">Email</label>
+                                <input type="text" id="emailWit" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-xl-6">
+                                <label for="phone">Balance</label>
+                                <input type="text" id="balanceWit" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="address">Transaction Amount</label>
+                                <input type="number" id="amountWit" name="amountWit" class="form-control">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="btnWithdraw" type="button" class="btn btn-outline-secondary">Withdraw</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="modal_transfer">
+    <div class="modal fade" tabindex="-1" id="mdTransfer" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Withdraw</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert-danger hide">
+                    </div>
+                    <form class="mb-3" autocomplete="off" id="frmTransfer">
+                        <div class="row">
+                            <div class="col-xl-4">
+                                <label for="fullName">Sender ID</label>
+                                <input type="number" id="senderId" name="senderId" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-4">
+                                <label for="email">Sender Name</label>
+                                <input type="text" id="senderName" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-4">
+                                <label for="email">Sender Email</label>
+                                <input type="text" id="senderEmail" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-xl-6">
+                                <label for="phone">Sender Balance</label>
+                                <input type="number" id="senderBalance" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-6">
+                                <label for="address">Recipient</label>
+                                <select class="form-select" name="recipient" id="recipient">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-4">
+                                <label for="fullName">$ Transfer amount</label>
+                                <input type="number" id="amountTrans" name="amountTrans" class="form-control">
+                            </div>
+                            <div class="col-xl-4">
+                                <label for="email">Fees (%)</label>
+                                <input type="text" id="fees" class="form-control" readonly>
+                            </div>
+                            <div class="col-xl-4">
+                                <label for="email">$ Total transaction amount</label>
+                                <input type="text" id="totalAmount" name="totalAmount" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="btnTransfer" type="button" class="btn btn-outline-warning">Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="modal_suspend">
+    <div class="modal fade" id="mdSuspend" data-bs-backdrop="static" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title text-danger" id="staticBackdropLabel">Warning</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure that you want to SUSPEND this customer?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="btnSuspend" type="button" class="btn btn-danger">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+</html>
+
