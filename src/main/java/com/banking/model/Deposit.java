@@ -20,11 +20,6 @@ public class Deposit extends BaseEntity{
     private Long id;
 
     @Column(nullable = false, precision = 12)
-    @NotNull(message = "Transaction amount must NOT be empty.")
-    @Digits(integer = 12, fraction = 0,
-            message = "Maximum digit of transaction amount is 12.")
-    @Min(value = 100,message = "Transaction amount must NOT be LESS than 100.")
-    @Max(value = 50000000,message = "Transaction amount must NOT be GREATER than 50,000,000.")
     private BigDecimal transactionAmount;
 
     @ManyToOne

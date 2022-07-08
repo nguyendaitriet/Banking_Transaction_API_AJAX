@@ -43,6 +43,8 @@ public class DepositRestController {
             if (customerExists.isPresent()) {
                 Customer customer = customerExists.get();
 
+                new DepositDTO().validate(depositDTO, bindingResult);
+
                 if (!bindingResult.hasErrors()) {
 
                     long transactionAmount = new BigDecimal(depositDTO.getTransactionAmount()).longValue();

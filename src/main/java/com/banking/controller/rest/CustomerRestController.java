@@ -98,9 +98,9 @@ public class CustomerRestController {
 
             if (customerExists.isPresent()) {
 
-//                if (!bindingResult.hasErrors()) {
+                if (!bindingResult.hasErrors()) {
 
-//                    Map<String, String> errors = new HashMap<>();
+                    Map<String, String> errors = new HashMap<>();
 
                     boolean emailUpdateExits = customerService.existsByEmailAndIdIsNot(customerDTO.getEmail(), validId);
                     boolean phoneUpdateExists = customerService.existsByPhoneAndIdIsNot(customerDTO.getPhone(), validId);
@@ -108,17 +108,19 @@ public class CustomerRestController {
 
                     if (emailUpdateExits) {
 //                       throw new DataInputEmailExist("Email address exist.");
+                        errors.put("email", "Email address exists.");
+
                         bindingResult.addError(new ObjectError("email", "Email address exist."));
                     }
 
                     if (phoneUpdateExists) {
-//                        errors.put("phone", "Phone number exists.");
-                        bindingResult.addError(new ObjectError("phone", "Phone number exist."));
+                        errors.put("phone", "Phone number exists.");
+//                        bindingResult.addError(new ObjectError("phone", "Phone number exist."));
                     }
 
-//                    if (errors.isEmpty()) {
+                    if (errors.isEmpty()) {
 
-                    if (!bindingResult.hasErrors()) {
+//                    if (!bindingResult.hasErrors()) {
 
                         try {
 
@@ -139,13 +141,13 @@ public class CustomerRestController {
                         }
                     }
 
-//                    return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+                    return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
 
-                    return appUtils.mapError(bindingResult);
+//                    return appUtils.mapError(bindingResult);
                 }
 
-//                return appUtils.mapError(bindingResult);
-//            }
+                return appUtils.mapError(bindingResult);
+            }
         }
 
         return new ResponseEntity<>("Customer ID doesn't exist.", HttpStatus.NOT_FOUND);

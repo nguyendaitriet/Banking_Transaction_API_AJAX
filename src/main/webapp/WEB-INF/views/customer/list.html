@@ -97,6 +97,8 @@
         customer.balance = 0;
         customer.deleted = 0;
 
+        $("#mdCreate .modal-alert-danger").removeClass('show').addClass('hide').empty();
+
         $.ajax({
             headers: {
                 "accept": "application/json",
@@ -160,6 +162,8 @@
         customer.phone = phone;
         customer.address = address;
 
+        $("#mdEdit .modal-alert-danger").removeClass('show').addClass('hide').empty();
+
         return $.ajax({
             headers: {
                 "accept": "application/json",
@@ -176,7 +180,7 @@
 
             handleRowBtn();
 
-            // $("#mdEdit").modal("hide");
+            $("#mdEdit").modal("hide");
             showSuccessMessage();
 
         })
@@ -211,6 +215,8 @@
         let transactionAmount = +$("#amountDep").val();
         newDeposit.transactionAmount = transactionAmount;
 
+        $("#mdDeposit .modal-alert-danger").removeClass('show').addClass('hide').empty();
+
         $.ajax({
             headers: {
                 "accept": "application/json",
@@ -223,13 +229,12 @@
         .done((data) => {
 
             customer = data;
+
             updateRow(data);
 
             handleRowBtn();
 
             $("#mdDeposit").modal("hide");
-
-
 
             showSuccessMessage();
 
@@ -264,44 +269,50 @@
     function doWithdraw() {
 
         let transactionAmount = +$("#amountWit").val();
-
-        delete newWithdraw.id;
-        newWithdraw.customerId = +customer.id;
-        newWithdraw.createdAt = getDateTime();
-        newWithdraw.updatedAt = getDateTime();
-        newWithdraw.createdBy = 1;
-        newWithdraw.updatedBy = 1;
         newWithdraw.transactionAmount = transactionAmount;
 
+        $("#mdWithdraw .modal-alert-danger").removeClass('show').addClass('hide').empty();
+
         $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
             type: "POST",
-            url: "http://localhost:3000/withdraws/",
-            data: newWithdraw
+            url: "http://localhost:8080/api/withdraws/" + customer.id,
+            data: JSON.stringify(newWithdraw)
         })
-            .fail((err) => {
-                alert("Failed operation!");
-            })
+        .done((data) => {
 
-        customer.balance = Number.parseInt(customer.balance) - transactionAmount;
+            customer = data;
 
-        $.ajax({
-            type: "PUT",
-            url: "http://localhost:3000/customers/" + customer.id,
-            data: customer
+            updateRow(data);
+
+            handleRowBtn();
+
+            $("#mdWithdraw").modal("hide");
+
+            showSuccessMessage();
+
         })
-            .done((data) => {
+        .fail((jqXHR) => {
 
-                customer = data;
-                updateRow(data);
+            console.log(jqXHR);
 
-                handleRowBtn();
+            let str='';
 
-                // $("#mdWithdraw").modal("hide");
-                showSuccessMessage();
-            })
-            .fail((err) => {
-                alert("Failed operation!");
-            })
+            if (jqXHR.responseJSON) {
+                $.each(jqXHR.responseJSON, (key,value) => {
+                    str += `<label id="${key}-error" class="error" for="${key}Wit">${value}</label>`
+                })
+
+                $("#mdWithdraw .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
+            else {
+                let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
+                $("#mdWithdraw .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
+        })
     }
 
     // let transferAmount = + $("#amountTrans").val();
@@ -841,36 +852,39 @@
     })
 
     $('#frmWithdraw').validate({
-        rules: {
-            amountWit:{
-                required: true,
-                number: true,
-                min: 100,
-                maximumWithdrawAmount: true,
-                maxlength: 12
-            }
-        },
-        messages: {
-            amountWit:{
-                required: "Transaction amount must NOT be empty.",
-                number: "Invalid transaction amount.",
-                min: $.validator.format("Transaction amount must NOT be less than {0}."),
-                maxlength: $.validator.format("Max character of transaction amount: {0}.")
-            }
-        },
-        errorLabelContainer: '#mdWithdraw .modal-alert-danger',
-        errorPlacement: function(error, element){
-            error.appendTo("#mdWithdraw .modal-alert-danger").removeClass('hide').addClass('show');
-        },
-        showErrors: function(errorMap, errorList) {
-            if (this.numberOfInvalids() > 0) {
-                $("#mdWithdraw .modal-alert-danger").removeClass('hide').addClass('show');
-            } else {
-                $("#mdWithdraw .modal-alert-danger").removeClass('show').addClass('hide').empty();
-                $("#frmWithdraw input.error").removeClass("error");
-            }
-            this.defaultShowErrors();
-        },
+        onkeyup: function(element) { $(element).valid() },
+        onclick: false,
+        onfocusout: false,
+        // rules: {
+        //     amountWit:{
+        //         required: true,
+        //         number: true,
+        //         min: 100,
+        //         maximumWithdrawAmount: true,
+        //         maxlength: 12
+        //     }
+        // },
+        // messages: {
+        //     amountWit:{
+        //         required: "Transaction amount must NOT be empty.",
+        //         number: "Invalid transaction amount.",
+        //         min: $.validator.format("Transaction amount must NOT be less than {0}."),
+        //         maxlength: $.validator.format("Max character of transaction amount: {0}.")
+        //     }
+        // },
+        // errorLabelContainer: '#mdWithdraw .modal-alert-danger',
+        // errorPlacement: function(error, element){
+        //     error.appendTo("#mdWithdraw .modal-alert-danger").removeClass('hide').addClass('show');
+        // },
+        // showErrors: function(errorMap, errorList) {
+        //     if (this.numberOfInvalids() > 0) {
+        //         $("#mdWithdraw .modal-alert-danger").removeClass('hide').addClass('show');
+        //     } else {
+        //         $("#mdWithdraw .modal-alert-danger").removeClass('show').addClass('hide').empty();
+        //         $("#frmWithdraw input.error").removeClass("error");
+        //     }
+        //     this.defaultShowErrors();
+        // },
         submitHandler: function() {
             doWithdraw();
         }

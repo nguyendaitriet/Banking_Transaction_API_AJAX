@@ -53,4 +53,5 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     boolean existsByPhoneAndIdIsNot(String phone, Long id);
 
     boolean existsByEmailAndIdIsNot(String email, Long id);
+
 }

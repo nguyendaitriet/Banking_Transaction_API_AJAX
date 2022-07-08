@@ -21,10 +21,6 @@ public class Withdraw extends BaseEntity {
     private Long id;
 
     @Column(nullable = false, precision = 12)
-    @NotNull(message = "Transaction amount must NOT be empty.")
-    @Digits(integer = 12, fraction = 0,
-            message = "Maximum digit of transaction amount is 12.")
-    @Min(value = 100,message = "Transaction amount must NOT be LESS than 100.")
     private BigDecimal transactionAmount;
 
     @ManyToOne

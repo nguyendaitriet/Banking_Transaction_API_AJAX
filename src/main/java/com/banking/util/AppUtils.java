@@ -19,10 +19,12 @@ public class AppUtils {
         Map<String,String > errorMap = new HashMap<>();
 
         for (FieldError fieldError : errorList) {
-            errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
+//            errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
+            errorMap.put(fieldError.getField(), fieldError.getCode());
         }
 
         return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
 
     }
+
 }
