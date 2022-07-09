@@ -1,20 +1,18 @@
 package com.banking.controller.rest;
 
-import com.banking.exception.DataInputEmailExist;
 import com.banking.model.dto.CustomerDTO;
 import com.banking.model.Customer;
 import com.banking.service.CustomerService;
 import com.banking.util.AppUtils;
+import com.banking.util.ErrorMessage;
 import com.banking.util.ParsingValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @RestController
@@ -41,36 +39,35 @@ public class CustomerRestController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCustomer(@RequestBody Customer customer) {
-
-        customer.setId(0L);
-        customer.setBalance(BigDecimal.ZERO);
+    public ResponseEntity<?> createCustomer(@Validated @RequestBody CustomerDTO customerDTO,
+                                            BindingResult bindingResult) {
 
         Map<String, String> errors = new HashMap<>();
 
-        boolean emailExits = customerService.existsByEmail(customer.getEmail());
-        boolean phoneExists = customerService.existsByPhone(customer.getPhone());
+        boolean emailExits = customerService.existsByEmail(customerDTO.getEmail());
+        boolean phoneExists = customerService.existsByPhone(customerDTO.getPhone());
 
         //Gather all responses and show on view
         if (emailExits) {
-            errors.put("email", "Email address exists.");
+            errors.put("email", ErrorMessage.DUPLICATE_EMAIL);
         }
 
         if (phoneExists) {
-            errors.put("phone", "Phone number exists.");
+            errors.put("phone", ErrorMessage.DUPLICATE_PHONE);
         }
 
-        if (errors.isEmpty()) {
+        if (!bindingResult.hasErrors() && errors.isEmpty()) {
             try {
-                customer = customerService.save(customer);
-                return new ResponseEntity<>(customer.toCustomerDTO(), HttpStatus.CREATED);
+
+                customerDTO = customerService.saveNewCustomerFromDTO(customerDTO);
+                return new ResponseEntity<>(customerDTO, HttpStatus.CREATED);
+
             } catch (Exception e) {
-                return new ResponseEntity<>("Process failed", HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>("Process failed. Please contact to the manager.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
-        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-
+        return appUtils.mapErrorPlus(bindingResult, errors);
     }
 
     @GetMapping("/{id}")
@@ -91,63 +88,44 @@ public class CustomerRestController {
                                             @Validated @RequestBody CustomerDTO customerDTO,
                                             BindingResult bindingResult) {
 
+        Map<String, String> errors = new HashMap<>();
 
         if (ParsingValidationUtils.isLongParsable(id)) {
             long validId = Long.parseLong(id);
-            Optional<Customer> customerExists = customerService.findById(validId);
+            Optional<Customer> customerExists = customerService.findByIdAndDeletedFalse(validId);
 
             if (customerExists.isPresent()) {
+                Customer customer = customerExists.get();
 
-                if (!bindingResult.hasErrors()) {
+                boolean emailUpdateExits = customerService.existsByEmailAndIdIsNot(customerDTO.getEmail(), validId);
+                boolean phoneUpdateExists = customerService.existsByPhoneAndIdIsNot(customerDTO.getPhone(), validId);
 
-                    Map<String, String> errors = new HashMap<>();
-
-                    boolean emailUpdateExits = customerService.existsByEmailAndIdIsNot(customerDTO.getEmail(), validId);
-                    boolean phoneUpdateExists = customerService.existsByPhoneAndIdIsNot(customerDTO.getPhone(), validId);
-
-
-                    if (emailUpdateExits) {
-//                       throw new DataInputEmailExist("Email address exist.");
-                        errors.put("email", "Email address exists.");
-
-                        bindingResult.addError(new ObjectError("email", "Email address exist."));
-                    }
-
-                    if (phoneUpdateExists) {
-                        errors.put("phone", "Phone number exists.");
-//                        bindingResult.addError(new ObjectError("phone", "Phone number exist."));
-                    }
-
-                    if (errors.isEmpty()) {
-
-//                    if (!bindingResult.hasErrors()) {
-
-                        try {
-
-                            Customer customer = customerDTO.toCustomer();
-
-                            customer.setId(customerExists.get().getId());
-                            customer.setBalance(customerExists.get().getBalance());
-
-                            customerService.save(customer);
-
-                            customerDTO = customer.toCustomerDTO();
-
-                            return new ResponseEntity<>(customerDTO, HttpStatus.OK);
-
-                        } catch (Exception e) {
-
-                            return new ResponseEntity<>("Process failed.", HttpStatus.INTERNAL_SERVER_ERROR);
-                        }
-                    }
-
-                    return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-
-//                    return appUtils.mapError(bindingResult);
+                if (emailUpdateExits) {
+                    errors.put("email", ErrorMessage.DUPLICATE_EMAIL);
                 }
 
-                return appUtils.mapError(bindingResult);
+                if (phoneUpdateExists) {
+                    errors.put("phone", ErrorMessage.DUPLICATE_PHONE);
+                }
+
+                if (!bindingResult.hasErrors() && errors.isEmpty()) {
+                    try {
+
+                        customerDTO = customerService.saveUpdatedCustomerFromDTO(customerDTO, customer);
+
+                        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
+
+                    } catch (Exception e) {
+
+                        return new ResponseEntity<>("Process failed.", HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
+                }
+
+                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+
             }
+
+            return appUtils.mapError(bindingResult);
         }
 
         return new ResponseEntity<>("Customer ID doesn't exist.", HttpStatus.NOT_FOUND);
@@ -160,8 +138,10 @@ public class CustomerRestController {
             Optional<Customer> customerExists = customerService.findById(validId);
 
             if (customerExists.isPresent()) {
+
                 customerService.suspendCustomer(validId);
                 return new ResponseEntity<>(customerExists.get(), HttpStatus.OK);
+
             }
         }
 

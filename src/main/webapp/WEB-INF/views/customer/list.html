@@ -55,6 +55,7 @@
 <script>
     let customers = [];
     let customer = new Customer();
+    let recipients = [];
     let recipient = new Customer();
     let newDeposit = new Deposit();
     let newWithdraw = new Withdraw();
@@ -140,6 +141,7 @@
             }
             else {
                 let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
+                $("#mdCreate .modal-alert-danger").removeClass('hide').addClass('show').append(str);
             }
         })
     }
@@ -152,15 +154,10 @@
 
     function doEdit() {
 
-        let fullName = $("#fullNameUp").val();
-        let email = $("#emailUp").val();
-        let phone = $("#phoneUp").val();
-        let address = $("#addressUp").val();
-
-        customer.fullName = fullName;
-        customer.email = email;
-        customer.phone = phone;
-        customer.address = address;
+        customer.fullName = $("#fullNameUp").val();
+        customer.email = $("#emailUp").val();
+        customer.phone = $("#phoneUp").val();
+        customer.address = $("#addressUp").val();
 
         $("#mdEdit .modal-alert-danger").removeClass('show').addClass('hide').empty();
 
@@ -212,7 +209,7 @@
 
     function doDeposit() {
 
-        let transactionAmount = +$("#amountDep").val();
+        let transactionAmount = $("#amountDep").val();
         newDeposit.transactionAmount = transactionAmount;
 
         $("#mdDeposit .modal-alert-danger").removeClass('show').addClass('hide').empty();
@@ -315,13 +312,13 @@
         })
     }
 
-    // let transferAmount = + $("#amountTrans").val();
+    // let transferAmount = + $("#transferAmount").val();
     // let feesAmount = transferAmount*fees/100;
     // let totalAmount = transferAmount + feesAmount;
     let totalAmount = 0;
 
-    $("#amountTrans").on("input", function () {
-        let transferAmount = + $("#amountTrans").val();
+    $("#transferAmount").on("input", function () {
+        let transferAmount = + $("#transferAmount").val();
         let feesAmount = Math.round(transferAmount*fees/100);
         totalAmount = transferAmount + feesAmount;
         $("#totalAmount").val(totalAmount);
@@ -335,34 +332,53 @@
 
     function doTransfer() {
 
-        withdrawSender().then(() => {
+        newTransfer.transferAmount = + $("#transferAmount").val();
+        newTransfer.recipientId = + $("#recipientId").val();
+        newTransfer.senderId = + $("#senderId").val();
 
-            let recipientId = +$("#recipient").val();
+        $("#mdTransfer .modal-alert-danger").removeClass('show').addClass('hide').empty();
 
-            findRecipientById(recipientId).then(() => {
-
-                depositRecipient(recipientId).then(function() {
-
-                    createTransfer().then(function() {
-
-                        alert("Done");
-
-                    })
-                        .catch(() => {
-                            alert("Fail to transfer.")
-                        })
-                })
-                    .catch(() => {
-                        alert("Fail to deposit.")
-                    })
-            })
-                .catch(() => {
-                    alert("Invalid recipient.");
-                })
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "PUT",
+            url: "http://localhost:8080/api/tranfers/",
+            data: JSON.stringify(newTransfer)
         })
-            .catch(() => {
-                alert("Fail to withdraw.")
+            .done((data) => {
+
+                customer = data;
+
+                updateRow(data);
+
+                handleRowBtn();
+
+                $("#mdTransfer").modal("hide");
+
+                showSuccessMessage();
+
             })
+            .fail((jqXHR) => {
+
+                console.log(jqXHR);
+
+                let str='';
+
+                if (jqXHR.responseJSON) {
+                    $.each(jqXHR.responseJSON, (key,value) => {
+                        str += `<label id="${key}-error" class="error" for="${key}Trans">${value}</label>`
+                    })
+
+                    $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+                }
+                else {
+                    let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
+                    $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+                }
+            })
+
     }
 
     function withdrawSender() {
@@ -382,7 +398,7 @@
 
     function depositRecipient(recipientId) {
 
-        let transferAmount = +$("#amountTrans").val();
+        let transferAmount = +$("#transferAmount").val();
         recipient.balance = Number.parseInt(recipient.balance) + transferAmount;
 
         return $.ajax({
@@ -402,7 +418,7 @@
 
     function createTransfer() {
 
-        let transferAmount = $("#amountTrans");
+        let transferAmount = $("#transferAmount");
 
         delete newTransfer.id;
         newTransfer.senderId = customer.id;
@@ -525,7 +541,7 @@
                 $("#senderBalance").val(customer.balance);
                 $("#fees").val(fees);
                 $("#mdTransfer").modal("show");
-                renderRecipients(id);
+                renderRecipients();
             });
 
         })
@@ -601,13 +617,13 @@
             type: "GET",
             url: "http://localhost:3000/customers/" + RecipientId
         })
-            .done((data) => {
-                recipient = data;
-                customer.balance = Number.parseInt(data.balance);
-            })
-            .fail((err) => {
-                alert("Recipient ID not found!");
-            })
+        .done((data) => {
+            recipient = data;
+            customer.balance = Number.parseInt(data.balance);
+        })
+        .fail((err) => {
+            alert("Recipient ID not found!");
+        })
     }
 
     function findAllCustomers() {
@@ -629,29 +645,31 @@
         return date;
     }
 
-    function getRecipients(id) {
-        let customerList = [];
-        findAllCustomers();
-        customers.forEach((value) => {
-            customerList.push(value);
+    function getRecipients() {
+        return $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/transfers/recipients/" + customer.id
         })
-        let currentCustomer = customerList.find(x => x.id === id);
-        let currentCustomerIndex = customerList.indexOf(currentCustomer);
-        customerList.splice(currentCustomerIndex, 1);
-        return customerList;
+        .done((data) => {
+            recipients = data;
+        })
+        .fail((err) => {
+            alert("Recipients not found!");
+        })
     }
 
-    function renderRecipients(id) {
+    function renderRecipients() {
 
-        let recipientList = getRecipients(id);
+        getRecipients().then( () => {
 
-        $("#recipient").empty();
+            $("#recipientId").empty();
 
-        $.each(recipientList, (i, item) => {
-            let str = `<option value="${item.id}">(${item.id}) ${item.fullName}</option>`;
-            $("#recipient").append(str);
-        });
+            $.each(recipients, (i, item) => {
+                let str = `<option value="${item.id}">(${item.id}) ${item.fullName}</option>`;
+                $("#recipientId").append(str);
+            })
 
+        })
     }
 
     function showSuccessMessage() {
@@ -860,7 +878,6 @@
         //         required: true,
         //         number: true,
         //         min: 100,
-        //         maximumWithdrawAmount: true,
         //         maxlength: 12
         //     }
         // },
@@ -891,65 +908,65 @@
     })
 
     $('#frmTransfer').validate({
-        rules: {
-            senderId: {
-                required: true,
-                number: true,
-                validSenderId: true
-            },
-            recipient: {
-                required: true,
-                number: true,
-                recipientIdExits: true
-            },
-            amountTrans:{
-                required: true,
-                number: true,
-                min: 100,
-                maximumTransferAmount: true,
-                maxlength: 12
-            },
-            totalAmount: {
-                required: true,
-                number: true,
-                validTotalAmount: true,
-                maxlength: 12
-            }
-        },
-        messages: {
-            senderId: {
-                required: "Sender ID must NOT be empty.",
-                number: "Invalid sender ID",
-            },
-            recipient: {
-                required: "Recipient ID must NOT be empty.",
-                number: "Invalid recipient ID"
-            },
-            amountTrans:{
-                required: "Transaction amount must NOT be empty.",
-                number: "Invalid transaction amount.",
-                min: $.validator.format("Transaction amount must NOT be less than {0}."),
-                maxlength: $.validator.format("Max character of transaction amount: {0}.")
-            },
-            totalAmount: {
-                required: "Total amount must NOT be empty.",
-                number: "Invalid total amount.",
-                maxlength: $.validator.format("Max character of total amount: {0}.")
-            }
-        },
-        errorLabelContainer: '#mdTransfer .modal-alert-danger',
-        errorPlacement: function(error, element){
-            error.appendTo("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show');
-        },
-        showErrors: function(errorMap, errorList) {
-            if (this.numberOfInvalids() > 0) {
-                $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show');
-            } else {
-                $("#mdTransfer .modal-alert-danger").removeClass('show').addClass('hide').empty();
-                $("#frmTransfer input.error").removeClass("error");
-            }
-            this.defaultShowErrors();
-        },
+        onkeyup: function(element) { $(element).valid() },
+        onclick: false,
+        onfocusout: false,
+        // rules: {
+        //     senderId: {
+        //         required: true,
+        //         number: true,
+        //         validSenderId: true
+        //     },
+        //     recipient: {
+        //         required: true,
+        //         number: true
+        //     },
+        //     transferAmount:{
+        //         required: true,
+        //         number: true,
+        //         min: 100
+        //         maxlength: 12
+        //     },
+        //     totalAmount: {
+        //         required: true,
+        //         number: true
+        //         maxlength: 12
+        //     }
+        // },
+        // messages: {
+        //     senderId: {
+        //         required: "Sender ID must NOT be empty.",
+        //         number: "Invalid sender ID",
+        //     },
+        //     recipient: {
+        //         required: "Recipient ID must NOT be empty.",
+        //         number: "Invalid recipient ID"
+        //     },
+        //     transferAmount:{
+        //         required: "Transaction amount must NOT be empty.",
+        //         number: "Invalid transaction amount.",
+        //         min: $.validator.format("Transaction amount must NOT be less than {0}."),
+        //         maxlength: $.validator.format("Max character of transaction amount: {0}.")
+        //     },
+        //     totalAmount: {
+        //         required: "Total amount must NOT be empty.",
+        //         number: "Invalid total amount.",
+        //         maxlength: $.validator.format("Max character of total amount: {0}.")
+        //     }
+        // },
+        // errorLabelContainer: '#mdTransfer .modal-alert-danger',
+        // errorPlacement: function(error, element){
+        //     error.appendTo("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show');
+        // },
+        // showErrors: function(errorMap, errorList) {
+        //     if (this.numberOfInvalids() > 0) {
+        //         $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show');
+        //     } else {
+        //         $("#mdTransfer .modal-alert-danger").removeClass('show').addClass('hide').empty();
+        //         $("#frmTransfer input.error").removeClass("error");
+        //     }
+        //     this.defaultShowErrors();
+        // },
         submitHandler: function() {
             doTransfer();
         }
@@ -963,34 +980,10 @@
         return this.optional(element) || /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$/.test(value);
     }, "Incorrect phone number format. Correct format: +1 (608) 468-6527.");
 
-    $.validator.addMethod("maximumWithdrawAmount", function(value, element) {
-        return this.optional(element) || (parseInt(value) <= customer.balance);
-    }, "Withdraw Amount must NOT be greater than balance.");
-
-    $.validator.addMethod("recipientIdExits", function(value, element) {
-            let recipientList = getRecipients(customer.id);
-            let currentRecipient = recipientList.find(x => x.id == value);
-            return this.optional(element) || (currentRecipient != undefined);
-        },
-        "Invalid recipient information."
-    )
-
-    $.validator.addMethod("validTotalAmount", function(value, element) {
-            return this.optional(element) || (value == totalAmount);
-        },
-        "Invalid total amount."
-    )
-
     $.validator.addMethod("validSenderId", function(value, element) {
             return this.optional(element) || (value == customer.id);
         },
         "Sender ID must NOT be changed."
-    )
-
-    $.validator.addMethod("maximumTransferAmount", function(value, element) {
-            return this.optional(element) || (customer.balance >= totalAmount)
-        },
-        "Balance is NOT enough to transfer."
     )
 
     $("#mdCreate").on("hidden.bs.modal", function () {

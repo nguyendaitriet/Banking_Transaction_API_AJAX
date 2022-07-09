@@ -1,6 +1,8 @@
 package com.banking.model.dto;
 
 import com.banking.model.Withdraw;
+import com.banking.util.ErrorMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -73,29 +75,29 @@ public class WithdrawDTO implements Validator {
         String transactionAmount = withdrawDTO.getTransactionAmount();
 
         if (transactionAmount == null || transactionAmount.equals("")) {
-            errors.rejectValue("transactionAmount", "transactionAmount.emptyAmount");
+            errors.rejectValue("transactionAmount", "400", ErrorMessage.EMPTY_AMOUNT);
             return;
         }
 
         boolean isTransactionAmountValid = java.util.regex.Pattern.matches("\\d+", transactionAmount);
         if (!isTransactionAmountValid) {
-            errors.rejectValue("transactionAmount", "transactionAmount.validFormat");
+            errors.rejectValue("transactionAmount", "400",ErrorMessage.INVALID_AMOUNT_FORMAT);
             return;
         }
 
         if (transactionAmount.length() > 12) {
-            errors.rejectValue("transactionAmount", "transactionAmount.length");
+            errors.rejectValue("transactionAmount","400", ErrorMessage.MAX_AMOUNT_LENGTH);
             return;
         }
 
         long validTransactionAmount = Long.parseLong(transactionAmount);
         if (validTransactionAmount < 100) {
-            errors.rejectValue("transactionAmount", "transactionAmount.minimumTransactionAmount");
+            errors.rejectValue("transactionAmount", "400", ErrorMessage.MINIMUM_TRANSACTION_AMOUNT);
             return;
         }
 
         if (validTransactionAmount > 50000000) {
-            errors.rejectValue("transactionAmount", "transactionAmount.maximumTransactionAmount");
+            errors.rejectValue("transactionAmount", "400",ErrorMessage.MAXIMUM_TRANSACTION_AMOUNT);
         }
 
     }

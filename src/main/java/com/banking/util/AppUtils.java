@@ -19,12 +19,30 @@ public class AppUtils {
         Map<String,String > errorMap = new HashMap<>();
 
         for (FieldError fieldError : errorList) {
-//            errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
-            errorMap.put(fieldError.getField(), fieldError.getCode());
+            errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
+//            errorMap.put(fieldError.getField(), fieldError.getCode());
         }
 
         return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
 
+    }
+
+    public ResponseEntity<?> mapErrorPlus(BindingResult result, Map<String, String> extraErrors) {
+        List<FieldError> errorList = result.getFieldErrors();
+
+        Map<String,String > errorMap = new HashMap<>();
+
+        if (!extraErrors.isEmpty()) {
+            errorMap.putAll(extraErrors);
+        }
+
+        if (result.hasErrors()) {
+            for (FieldError fieldError : errorList) {
+                errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
+            }
+        }
+
+        return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
     }
 
 }

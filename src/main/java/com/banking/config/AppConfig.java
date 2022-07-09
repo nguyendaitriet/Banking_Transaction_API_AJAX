@@ -34,7 +34,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableWebMvc
-@EnableTransactionManagement
+@EnableTransactionManagement(proxyTargetClass = true)
 @EnableJpaRepositories("com.banking.repository")
 @ComponentScan("com.banking")
 @EnableSpringDataWebSupport

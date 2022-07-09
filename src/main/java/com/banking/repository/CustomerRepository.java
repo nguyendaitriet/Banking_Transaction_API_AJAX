@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,12 +44,36 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "WHERE c.id = :id AND c.deleted = false ")
     Optional<CustomerDTO> findCustomerDTOById(@Param("id") Long id);
 
+    @Query("SELECT NEW com.banking.model.dto.CustomerDTO (" +
+                "c.id, " +
+                "c.fullName " +
+            ") " +
+            "FROM Customer c " +
+            "WHERE c.id <> :id AND c.deleted = false ")
+    List<CustomerDTO> findRecipients(@Param("id") Long senderId);
+
+    Optional<Customer> findByIdAndDeletedFalse(Long id);
+
     @Modifying
     @Transactional
     @Query("UPDATE Customer c " +
             "SET c.deleted = TRUE " +
             "WHERE c.id = :id")
     void suspendCustomer(@Param("id") long id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Customer c " +
+            "SET c.balance = c.balance + :amount " +
+            "WHERE c.id = :id")
+    void increaseBalance(@Param("id") long id, @Param("amount") BigDecimal amount);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Customer c " +
+            "SET c.balance = c.balance - :amount " +
+            "WHERE c.id = :id")
+    void decreaseBalance(@Param("id") long id, @Param("amount") BigDecimal amount);
 
     boolean existsByPhoneAndIdIsNot(String phone, Long id);
 

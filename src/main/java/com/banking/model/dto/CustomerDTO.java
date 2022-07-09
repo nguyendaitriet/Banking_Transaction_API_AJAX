@@ -35,6 +35,11 @@ public class CustomerDTO {
     public CustomerDTO() {
     }
 
+    public CustomerDTO(Long id, String fullName) {
+        this.id = id;
+        this.fullName = fullName;
+    }
+
     public CustomerDTO(Long id, String fullName, String email, String phone, String address, BigDecimal balance) {
         this.id = id;
         this.fullName = fullName;

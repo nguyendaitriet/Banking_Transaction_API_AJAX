@@ -8,6 +8,10 @@ import java.util.Optional;
 
 public interface ICustomerService extends IGeneralService<Customer> {
 
+    CustomerDTO saveNewCustomerFromDTO(CustomerDTO customerDTO);
+
+    CustomerDTO saveUpdatedCustomerFromDTO(CustomerDTO customerDTO, Customer customer);
+
     boolean existsByEmail(String email);
 
     boolean existsByPhone(String phone);
@@ -15,6 +19,10 @@ public interface ICustomerService extends IGeneralService<Customer> {
     List<CustomerDTO> findAllCustomersDTO();
 
     Optional<CustomerDTO> findCustomerDTOById(Long id);
+
+    List<CustomerDTO> findRecipients(Long senderId);
+
+    Optional<Customer> findByIdAndDeletedFalse(Long id);
 
     void suspendCustomer(Long id);
 

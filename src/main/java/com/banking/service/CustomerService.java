@@ -6,10 +6,14 @@ import com.banking.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class CustomerService implements ICustomerService{
 
     @Autowired
@@ -31,9 +35,20 @@ public class CustomerService implements ICustomerService{
     }
 
     @Override
+    public List<CustomerDTO> findRecipients(Long senderId) {
+        return customerRepository.findRecipients(senderId);
+    }
+
+    @Override
+    public Optional<Customer> findByIdAndDeletedFalse(Long id) {
+        return customerRepository.findByIdAndDeletedFalse(id);
+    }
+
+    @Override
     public Optional<Customer> findById(Long id) {
         return customerRepository.findById(id);
     }
+
 
     @Override
     public boolean existsByEmail(String email) {
@@ -63,6 +78,22 @@ public class CustomerService implements ICustomerService{
     @Override
     public Customer save(Customer customer) {
         return customerRepository.save(customer);
+    }
+
+    @Override
+    public CustomerDTO saveNewCustomerFromDTO(CustomerDTO customerDTO) {
+        Customer customer = customerDTO.toCustomer();
+        customer.setId(0L);
+        customer.setBalance(BigDecimal.ZERO);
+        return save(customer).toCustomerDTO();
+    }
+
+    @Override
+    public CustomerDTO saveUpdatedCustomerFromDTO(CustomerDTO customerDTO, Customer customer) {
+        Customer customerUpdated = customerDTO.toCustomer();
+        customerUpdated.setId(customer.getId());
+        customerUpdated.setBalance(customer.getBalance());
+        return save(customerUpdated).toCustomerDTO();
     }
 
     @Override

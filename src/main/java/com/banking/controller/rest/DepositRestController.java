@@ -16,6 +16,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -47,25 +49,9 @@ public class DepositRestController {
 
                 if (!bindingResult.hasErrors()) {
 
-                    long transactionAmount = new BigDecimal(depositDTO.getTransactionAmount()).longValue();
+                    CustomerDTO customerDTO = depositService.deposit(depositDTO, customer);
+                    return new ResponseEntity<>(customerDTO, HttpStatus.OK);
 
-                    if (transactionAmount >= 100 && transactionAmount <= 50000000) {
-
-                        BigDecimal newBalance = customer.getBalance().add(new BigDecimal(transactionAmount));
-                        customer.setBalance(newBalance);
-                        customerService.save(customer);
-
-                        Deposit newDeposit = new Deposit();
-                        newDeposit.setTransactionAmount(new BigDecimal(transactionAmount));
-                        newDeposit.setCustomer(customer);
-                        depositService.save(newDeposit);
-
-                        CustomerDTO customerDTO = customer.toCustomerDTO();
-                        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
-
-                    }
-
-                    return new ResponseEntity<>("Transaction Amount must greater than 100 and less than 50,000,000", HttpStatus.BAD_REQUEST);
                 }
 
                 return appUtils.mapError(bindingResult);

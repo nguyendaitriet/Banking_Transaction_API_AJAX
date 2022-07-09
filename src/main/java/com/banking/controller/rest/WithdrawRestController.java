@@ -10,6 +10,7 @@ import com.banking.model.dto.WithdrawDTO;
 import com.banking.service.CustomerService;
 import com.banking.service.WithdrawService;
 import com.banking.util.AppUtils;
+import com.banking.util.ErrorMessage;
 import com.banking.util.ParsingValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -39,6 +42,8 @@ public class WithdrawRestController {
                                       @Validated @RequestBody WithdrawDTO withdrawDTO,
                                       BindingResult bindingResult) {
 
+        Map<String, String> errors = new HashMap<>();
+
         if (ParsingValidationUtils.isLongParsable(id)) {
             long validId = Long.parseLong(id);
             Optional<Customer> customerExists = customerService.findById(validId);
@@ -46,32 +51,23 @@ public class WithdrawRestController {
             if (customerExists.isPresent()) {
                 Customer customer = customerExists.get();
 
-                new WithdrawDTO().validate(withdrawDTO, bindingResult);
+                long transactionAmount = new BigDecimal(withdrawDTO.getTransactionAmount()).longValue();
+                long customerBalance = customer.getBalance().longValue();
 
-                if (!bindingResult.hasErrors()) {
-
-                    long transactionAmount = new BigDecimal(withdrawDTO.getTransactionAmount()).longValue();
-
-                    if (transactionAmount >= 100 && transactionAmount <= 50000000) {
-
-                        BigDecimal newBalance = customer.getBalance().subtract(new BigDecimal(transactionAmount));
-                        customer.setBalance(newBalance);
-                        customerService.save(customer);
-
-                        Withdraw newWithdraw = new Withdraw();
-                        newWithdraw.setTransactionAmount(new BigDecimal(transactionAmount));
-                        newWithdraw.setCustomer(customer);
-                        withdrawService.save(newWithdraw);
-
-                        CustomerDTO customerDTO = customer.toCustomerDTO();
-                        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
-
-                    }
-
-                    return new ResponseEntity<>("Transaction Amount must greater than 100 and less than 50,000,000", HttpStatus.BAD_REQUEST);
+                if (transactionAmount > customerBalance) {
+                    errors.put("amountWit", ErrorMessage.MAXIMUM_WITHDRAW_AMOUNT);
                 }
 
-                return appUtils.mapError(bindingResult);
+                new WithdrawDTO().validate(withdrawDTO, bindingResult);
+
+                if (!bindingResult.hasErrors() && errors.isEmpty()) {
+
+                        CustomerDTO customerDTO = withdrawService.withdraw(withdrawDTO, customer);
+                        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
+
+                }
+
+                return appUtils.mapErrorPlus(bindingResult, errors);
             }
         }
 
