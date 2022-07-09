@@ -55,16 +55,19 @@ public class WithdrawRestController {
                 long customerBalance = customer.getBalance().longValue();
 
                 if (transactionAmount > customerBalance) {
-                    errors.put("amountWit", ErrorMessage.MAXIMUM_WITHDRAW_AMOUNT);
+                    errors.put("transactionAmount", ErrorMessage.MAXIMUM_WITHDRAW_AMOUNT);
                 }
 
                 new WithdrawDTO().validate(withdrawDTO, bindingResult);
 
                 if (!bindingResult.hasErrors() && errors.isEmpty()) {
-
+                    try {
                         CustomerDTO customerDTO = withdrawService.withdraw(withdrawDTO, customer);
                         return new ResponseEntity<>(customerDTO, HttpStatus.OK);
 
+                    } catch (Exception e) {
+                        return new ResponseEntity<>("Process failed.", HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
                 }
 
                 return appUtils.mapErrorPlus(bindingResult, errors);

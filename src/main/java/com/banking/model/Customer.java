@@ -35,6 +35,9 @@ public class Customer extends BaseEntity{
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
     private List<Withdraw> withdraws;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+    private List<Deposit> transfers;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "sender")
     private List<Transfer> senders;
 
@@ -119,6 +122,14 @@ public class Customer extends BaseEntity{
 
     public void setWithdraws(List<Withdraw> withdraws) {
         this.withdraws = withdraws;
+    }
+
+    public List<Deposit> getTransfers() {
+        return transfers;
+    }
+
+    public void setTransfers(List<Deposit> transfers) {
+        this.transfers = transfers;
     }
 
     public List<Transfer> getSenders() {

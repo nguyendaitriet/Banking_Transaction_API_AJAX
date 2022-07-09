@@ -49,9 +49,14 @@ public class DepositRestController {
 
                 if (!bindingResult.hasErrors()) {
 
-                    CustomerDTO customerDTO = depositService.deposit(depositDTO, customer);
-                    return new ResponseEntity<>(customerDTO, HttpStatus.OK);
+                    try {
 
+                        CustomerDTO customerDTO = depositService.deposit(depositDTO, customer);
+                        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
+
+                    } catch (Exception e) {
+                        return new ResponseEntity<>("Process failed.", HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
                 }
 
                 return appUtils.mapError(bindingResult);

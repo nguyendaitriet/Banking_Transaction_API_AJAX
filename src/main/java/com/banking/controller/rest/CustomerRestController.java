@@ -35,7 +35,6 @@ public class CustomerRestController {
         }
 
         return new ResponseEntity<>(customerList, HttpStatus.OK);
-
     }
 
     @PostMapping("/create")
@@ -112,17 +111,14 @@ public class CustomerRestController {
                     try {
 
                         customerDTO = customerService.saveUpdatedCustomerFromDTO(customerDTO, customer);
-
                         return new ResponseEntity<>(customerDTO, HttpStatus.OK);
 
                     } catch (Exception e) {
-
                         return new ResponseEntity<>("Process failed.", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 }
 
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-
             }
 
             return appUtils.mapError(bindingResult);

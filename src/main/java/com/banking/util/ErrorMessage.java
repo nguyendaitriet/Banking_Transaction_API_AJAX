@@ -11,7 +11,13 @@ public class ErrorMessage {
     public static final String MAXIMUM_TRANSACTION_AMOUNT = "Transaction amount must NOT be GREATER than 50,000,000.";
     public static final String MAXIMUM_WITHDRAW_AMOUNT = "Balance is not enough for this transaction.";
 
-    public static final String EMPTY = "Balance is not enough for this transaction.";
+
+    public static final String SENDER_NOT_EMPTY = "Sender ID must NOT be empty.";
+    public static final String RECIPIENT_NOT_EMPTY = "Recipient ID must NOT be empty.";
+    public static final String EMPTY_TRANSFER_AMOUNT = "Transfer amount must NOT be empty.";
+    public static final String SENDER_NOT_EXIST = "Sender ID doesn't exist.";
+    public static final String RECIPIENT_NOT_EXIST = "Recipient ID doesn't exist.";
+    public static final String DUPLICATE_SENDER = "Sender and recipient must NOT be the same.";
 
 
 

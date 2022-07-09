@@ -57,6 +57,7 @@
     let customer = new Customer();
     let recipients = [];
     let recipient = new Customer();
+    let sender = new Customer();
     let newDeposit = new Deposit();
     let newWithdraw = new Withdraw();
     let newTransfer = new Transfer();
@@ -209,7 +210,7 @@
 
     function doDeposit() {
 
-        let transactionAmount = $("#amountDep").val();
+        let transactionAmount = $("#transactionAmountDep").val();
         newDeposit.transactionAmount = transactionAmount;
 
         $("#mdDeposit .modal-alert-danger").removeClass('show').addClass('hide').empty();
@@ -265,7 +266,7 @@
 
     function doWithdraw() {
 
-        let transactionAmount = +$("#amountWit").val();
+        let transactionAmount = +$("#transactionAmountWit").val();
         newWithdraw.transactionAmount = transactionAmount;
 
         $("#mdWithdraw .modal-alert-danger").removeClass('show').addClass('hide').empty();
@@ -332,9 +333,9 @@
 
     function doTransfer() {
 
-        newTransfer.transferAmount = + $("#transferAmount").val();
-        newTransfer.recipientId = + $("#recipientId").val();
-        newTransfer.senderId = + $("#senderId").val();
+        newTransfer.transferAmount =  $("#transferAmount").val();
+        newTransfer.recipientId =  $("#recipientId").val();
+        newTransfer.senderId =  $("#senderId").val();
 
         $("#mdTransfer .modal-alert-danger").removeClass('show').addClass('hide').empty();
 
@@ -344,40 +345,40 @@
                 "content-type": "application/json"
             },
             type: "PUT",
-            url: "http://localhost:8080/api/tranfers/",
+            url: "http://localhost:8080/api/transfers/",
             data: JSON.stringify(newTransfer)
         })
-            .done((data) => {
+        .done((data) => {
 
-                customer = data;
+            updateRow(data.sender);
 
-                updateRow(data);
+            updateRow(data.recipient);
 
-                handleRowBtn();
+            handleRowBtn();
 
-                $("#mdTransfer").modal("hide");
+            $("#mdTransfer").modal("hide");
 
-                showSuccessMessage();
+            showSuccessMessage();
 
-            })
-            .fail((jqXHR) => {
+        })
+        .fail((jqXHR) => {
 
-                console.log(jqXHR);
+            console.log(jqXHR);
 
-                let str='';
+            let str='';
 
-                if (jqXHR.responseJSON) {
-                    $.each(jqXHR.responseJSON, (key,value) => {
-                        str += `<label id="${key}-error" class="error" for="${key}Trans">${value}</label>`
-                    })
+            if (jqXHR.responseJSON) {
+                $.each(jqXHR.responseJSON, (key,value) => {
+                    str += `<label id="${key}-error" class="error" for="${key}">${value}</label>`
+                })
 
-                    $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show').append(str);
-                }
-                else {
-                    let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
-                    $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show').append(str);
-                }
-            })
+                $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
+            else {
+                let str = `<label id="message-error" class="error">${jqXHR.responseText}</label>`
+                $("#mdTransfer .modal-alert-danger").removeClass('hide').addClass('show').append(str);
+            }
+        })
 
     }
 
@@ -834,7 +835,7 @@
         onclick: false,
         onfocusout: false,
         // rules: {
-        //     amountDep:{
+        //     transactionAmountDep:{
         //         required: true,
         //         number: true,
         //         min: 100,
@@ -843,7 +844,7 @@
         //     }
         // },
         // messages: {
-        //     amountDep:{
+        //     transactionAmountDep:{
         //         required: "Transaction amount must NOT be empty.",
         //         number: "Invalid transaction amount.",
         //         min: $.validator.format("Transaction amount must NOT be less than {0}."),
@@ -874,7 +875,7 @@
         onclick: false,
         onfocusout: false,
         // rules: {
-        //     amountWit:{
+        //     transactionAmountWit:{
         //         required: true,
         //         number: true,
         //         min: 100,
@@ -882,7 +883,7 @@
         //     }
         // },
         // messages: {
-        //     amountWit:{
+        //     transactionAmountWit:{
         //         required: "Transaction amount must NOT be empty.",
         //         number: "Invalid transaction amount.",
         //         min: $.validator.format("Transaction amount must NOT be less than {0}."),
