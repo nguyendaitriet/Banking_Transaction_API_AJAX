@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TransferRepository extends JpaRepository<Transfer, Long> {
 
-    @Query("SELECT NEW com.banking.model.dto.TransferInfoDTO (" +
+    @Query("SELECT " +
                 "t.id AS id, " +
                 "t.sender.id AS senderId, " +
                 "t.sender.fullName AS senderName, " +
@@ -19,12 +21,9 @@ public interface TransferRepository extends JpaRepository<Transfer, Long> {
                 "t.fees AS fees, " +
                 "t.feesAmount AS feesAmount, " +
                 "t.createdAt AS creationDate " +
-            ") " +
-            "FROM Transfer AS t " +
-            "INNER JOIN Customer AS c1 ON c1.id = t.sender.id " +
-            "INNER JOIN Customer AS c2 ON c2.id = t.recipient.id " +
-            "ORDER BY t.id ")
-    TransferInfoDTO getTransferInfo();
+            "FROM Transfer AS t "
+    )
+    List<TransferInfoDTO> getTransferInfo();
 
 
 }

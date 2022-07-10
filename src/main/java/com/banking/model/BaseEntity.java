@@ -33,6 +33,21 @@ public abstract class BaseEntity {
     @Column(name = "updated_by")
     private Long updatedBy;
 
+    public BaseEntity() {
+    }
+
+    public BaseEntity(boolean deleted, Date createdAt, Long createdBy, Date updatedAt, Long updatedBy) {
+        this.deleted = deleted;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.updatedAt = updatedAt;
+        this.updatedBy = updatedBy;
+    }
+
+    public BaseEntity(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }

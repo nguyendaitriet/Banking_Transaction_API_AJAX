@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -107,7 +108,7 @@ public class TransferRestController {
 
     @GetMapping("/showTransferInfo")
     public ResponseEntity<?> getTransferInfo() {
-        TransferInfoDTO transferInfoDTO = transferService.getTransferInfo();
+        List<TransferInfoDTO> transferInfoDTO = transferService.getTransferInfo();
         return new ResponseEntity<>(transferInfoDTO, HttpStatus.OK);
     }
 }

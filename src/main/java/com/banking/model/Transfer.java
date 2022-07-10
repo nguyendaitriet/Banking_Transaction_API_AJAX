@@ -53,6 +53,16 @@ public class Transfer extends BaseEntity {
         this.recipient = recipient;
     }
 
+    public Transfer(Long id, BigDecimal transferAmount, int fees, BigDecimal feesAmount, Customer sender, Customer recipient, Date createdAt) {
+        super(createdAt);
+        this.id = id;
+        this.transferAmount = transferAmount;
+        this.fees = fees;
+        this.feesAmount = feesAmount;
+        this.sender = sender;
+        this.recipient = recipient;
+    }
+
     public Long getId() {
         return id;
     }
