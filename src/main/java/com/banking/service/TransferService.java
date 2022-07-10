@@ -3,6 +3,7 @@ package com.banking.service;
 import com.banking.model.Customer;
 import com.banking.model.Transfer;
 import com.banking.model.dto.TransferDTO;
+import com.banking.model.dto.TransferInfoDTO;
 import com.banking.repository.CustomerRepository;
 import com.banking.repository.TransferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,5 +69,10 @@ public class TransferService implements ITransferService{
         newTransfer.setFeesAmount(feesAmount);
         newTransfer.setTransactionAmount(totalTransactionAmount);
 
+    }
+
+    @Override
+    public TransferInfoDTO getTransferInfo() {
+        return transferRepository.getTransferInfo();
     }
 }

@@ -38,7 +38,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
                 "c.email, " +
                 "c.phone, " +
                 "c.address, " +
-                "c.balance" +
+                "c.balance " +
             ") " +
             "FROM Customer c " +
             "WHERE c.id = :id AND c.deleted = false ")

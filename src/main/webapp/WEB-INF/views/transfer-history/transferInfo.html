@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Transfer Information</title>
+    <th:block th:replace="/layout/head :: head"></th:block>
+</head>
+
+<body>
+<div class="container">
+    <div class="table-title">
+        <div class="row">
+            <div class="col-sm-5">
+                <h1>Transfer Information</h1>
+            </div>
+            <div class="col-sm-7">
+                <a href="/customers" class="btn btn-outline-light">
+                    <i class="fa-solid fa-bars"></i>
+                    <span>List of customers</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <table class="table table-hover table-borderless">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Sender ID</th>
+                <th>Sender Name</th>
+                <th>Recipient ID</th>
+                <th>Recipient Name</th>
+                <th>Transfer Amount (VND)</th>
+                <th>Fee (&)</th>
+                <th>Fee Amount (VND)</th>
+                <th>Creation Date</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr style="font-size: 25px">
+                <td colspan="7" class="text-end">
+                    <span style="font-weight: bold;">Total fee amount: </span>
+                </td>
+                <td class="text-end"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<th:block th:replace="/layout/script :: script"></th:block>
+
+<script>
+
+</script>
+</body>
+
+</html>

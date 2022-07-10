@@ -3,6 +3,7 @@ package com.banking.controller.rest;
 import com.banking.model.Customer;
 import com.banking.model.dto.CustomerDTO;
 import com.banking.model.dto.TransferDTO;
+import com.banking.model.dto.TransferInfoDTO;
 import com.banking.service.CustomerService;
 import com.banking.service.TransferService;
 import com.banking.util.AppUtils;
@@ -102,5 +103,11 @@ public class TransferRestController {
         }
 
         return appUtils.mapError(bindingResult);
+    }
+
+    @GetMapping("/showTransferInfo")
+    public ResponseEntity<?> getTransferInfo() {
+        TransferInfoDTO transferInfoDTO = transferService.getTransferInfo();
+        return new ResponseEntity<>(transferInfoDTO, HttpStatus.OK);
     }
 }

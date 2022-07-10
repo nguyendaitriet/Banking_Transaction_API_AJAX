@@ -10,7 +10,6 @@ public class CustomerController {
     @GetMapping("/customers")
     public ModelAndView showListPage() {
         ModelAndView modelAndView = new ModelAndView("/customer/list");
-
         return modelAndView;
     }
  }
