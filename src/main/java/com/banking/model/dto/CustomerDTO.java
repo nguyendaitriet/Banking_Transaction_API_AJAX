@@ -26,7 +26,6 @@ public class CustomerDTO {
     @NotEmpty(message = "Phone number must NOT be empty.")
     @Pattern(regexp = "^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}$",
             message = "Incorrect phone number format. Correct format: +1 (608) 468-6527.")
-
     private String phone;
 
     private String address;

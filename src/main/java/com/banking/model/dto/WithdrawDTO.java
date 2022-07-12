@@ -12,12 +12,6 @@ public class WithdrawDTO implements Validator {
     private String fullName;
     private String email;
     private BigDecimal balance;
-
-    //    @NotEmpty
-//    @Size(max = 12,
-//    message = "Max length of transaction amount: 12.")
-//    @Pattern(regexp = "\\d+",
-//            message = "Transaction amount contains number only.")
     private String transactionAmount;
 
     public WithdrawDTO() {

@@ -14,12 +14,6 @@ public class DepositDTO implements Validator {
     private String fullName;
     private String email;
     private BigDecimal balance;
-
-//    @NotEmpty
-//    @Size(max = 12,
-//    message = "Max length of transaction amount: 12.")
-//    @Pattern(regexp = "\\d+",
-//            message = "Transaction amount contains number only.")
     private String transactionAmount;
 
     public DepositDTO() {
@@ -67,7 +61,7 @@ public class DepositDTO implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return Withdraw.class.isAssignableFrom(clazz);
+        return DepositDTO.class.isAssignableFrom(clazz);
     }
 
     @Override

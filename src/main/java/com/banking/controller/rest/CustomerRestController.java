@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,21 +42,18 @@ public class CustomerRestController {
     public ResponseEntity<?> createCustomer(@Validated @RequestBody CustomerDTO customerDTO,
                                             BindingResult bindingResult) {
 
-        Map<String, String> errors = new HashMap<>();
-
         boolean emailExits = customerService.existsByEmail(customerDTO.getEmail());
         boolean phoneExists = customerService.existsByPhone(customerDTO.getPhone());
 
-        //Gather all responses and show on view
         if (emailExits) {
-            errors.put("email", ErrorMessage.DUPLICATE_EMAIL);
+            bindingResult.addError(new FieldError("email", "email", ErrorMessage.DUPLICATE_EMAIL));
         }
 
         if (phoneExists) {
-            errors.put("phone", ErrorMessage.DUPLICATE_PHONE);
+            bindingResult.addError(new FieldError("phone", "phone", ErrorMessage.DUPLICATE_PHONE));
         }
 
-        if (!bindingResult.hasErrors() && errors.isEmpty()) {
+        if (!bindingResult.hasErrors()) {
             try {
 
                 customerDTO = customerService.saveNewCustomerFromDTO(customerDTO);
@@ -66,7 +64,7 @@ public class CustomerRestController {
             }
         }
 
-        return appUtils.mapErrorPlus(bindingResult, errors);
+        return appUtils.mapError(bindingResult);
     }
 
     @GetMapping("/{id}")
@@ -87,8 +85,6 @@ public class CustomerRestController {
                                             @Validated @RequestBody CustomerDTO customerDTO,
                                             BindingResult bindingResult) {
 
-        Map<String, String> errors = new HashMap<>();
-
         if (ParsingValidationUtils.isLongParsable(id)) {
             long validId = Long.parseLong(id);
             Optional<Customer> customerExists = customerService.findByIdAndDeletedFalse(validId);
@@ -100,14 +96,14 @@ public class CustomerRestController {
                 boolean phoneUpdateExists = customerService.existsByPhoneAndIdIsNot(customerDTO.getPhone(), validId);
 
                 if (emailUpdateExits) {
-                    errors.put("email", ErrorMessage.DUPLICATE_EMAIL);
+                    bindingResult.addError(new FieldError("email", "email", ErrorMessage.DUPLICATE_EMAIL));
                 }
 
                 if (phoneUpdateExists) {
-                    errors.put("phone", ErrorMessage.DUPLICATE_PHONE);
+                    bindingResult.addError(new FieldError("phone", "phone", ErrorMessage.DUPLICATE_PHONE));
                 }
 
-                if (!bindingResult.hasErrors() && errors.isEmpty()) {
+                if (!bindingResult.hasErrors()) {
                     try {
 
                         customerDTO = customerService.saveUpdatedCustomerFromDTO(customerDTO, customer);
@@ -117,8 +113,6 @@ public class CustomerRestController {
                         return new ResponseEntity<>("Process failed.", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 }
-
-                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
 
             return appUtils.mapError(bindingResult);
@@ -136,7 +130,7 @@ public class CustomerRestController {
             if (customerExists.isPresent()) {
 
                 customerService.suspendCustomer(validId);
-                return new ResponseEntity<>(customerExists.get(), HttpStatus.OK);
+                return new ResponseEntity<>(customerExists.get().toCustomerDTO(), HttpStatus.OK);
 
             }
         }

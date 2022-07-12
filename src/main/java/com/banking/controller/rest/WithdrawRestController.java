@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,8 +43,6 @@ public class WithdrawRestController {
                                       @Validated @RequestBody WithdrawDTO withdrawDTO,
                                       BindingResult bindingResult) {
 
-        Map<String, String> errors = new HashMap<>();
-
         if (ParsingValidationUtils.isLongParsable(id)) {
             long validId = Long.parseLong(id);
             Optional<Customer> customerExists = customerService.findById(validId);
@@ -55,12 +54,12 @@ public class WithdrawRestController {
                 long customerBalance = customer.getBalance().longValue();
 
                 if (transactionAmount > customerBalance) {
-                    errors.put("transactionAmount", ErrorMessage.MAXIMUM_WITHDRAW_AMOUNT);
+                    bindingResult.addError(new FieldError("transactionAmount","transactionAmount", ErrorMessage.MAXIMUM_WITHDRAW_AMOUNT));
                 }
 
                 new WithdrawDTO().validate(withdrawDTO, bindingResult);
 
-                if (!bindingResult.hasErrors() && errors.isEmpty()) {
+                if (!bindingResult.hasErrors()) {
                     try {
                         CustomerDTO customerDTO = withdrawService.withdraw(withdrawDTO, customer);
                         return new ResponseEntity<>(customerDTO, HttpStatus.OK);
@@ -70,7 +69,7 @@ public class WithdrawRestController {
                     }
                 }
 
-                return appUtils.mapErrorPlus(bindingResult, errors);
+                return appUtils.mapError(bindingResult);
             }
         }
 

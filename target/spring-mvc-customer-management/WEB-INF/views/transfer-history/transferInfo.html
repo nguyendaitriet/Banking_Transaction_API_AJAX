@@ -23,27 +23,27 @@
     </div>
 
     <div>
-        <table class="table table-hover table-borderless">
+        <table id="tb-transfer-info" class="table table-hover table-borderless">
             <thead>
-            <tr>
-                <th>#</th>
-                <th>Sender ID</th>
-                <th>Sender Name</th>
-                <th>Recipient ID</th>
-                <th>Recipient Name</th>
-                <th>Transfer Amount (VND)</th>
-                <th>Fee (&)</th>
-                <th>Fee Amount (VND)</th>
-                <th>Creation Date</th>
-            </tr>
+                <tr>
+                    <th>#</th>
+                    <th>Sender ID</th>
+                    <th>Sender Name</th>
+                    <th>Recipient ID</th>
+                    <th>Recipient Name</th>
+                    <th>Transfer Amount</th>
+                    <th>Fee (%)</th>
+                    <th>Fee Amount</th>
+                    <th>Creation Date</th>
+                </tr>
             </thead>
             <tbody>
 
             <tr style="font-size: 25px">
                 <td colspan="7" class="text-end">
-                    <span style="font-weight: bold;">Total fee amount: </span>
+                    <span style="font-weight: bold;">Total fees amount: </span>
                 </td>
-                <td class="text-end"></td>
+                <td id="totalFeesAmount" class="text-end"></td>
             </tr>
             </tbody>
         </table>
@@ -53,7 +53,36 @@
 <th:block th:replace="/layout/script :: script"></th:block>
 
 <script>
+    $.ajax({
+        type: "GET",
+        url: "http://localhost:8080/api/transfers/showTransferInfo"
+    })
+    .done((data) => {
 
+        let totalFeesAmount = 0;
+
+        $.each((data), (i, item) => {
+
+            let creationDate = new Date(item.creationDate).toLocaleString('en-GB');
+            let str = `<tr>
+                    <td>${item.id}</td>
+                    <td class="text-center">${item.senderId}</td>
+                    <td>${item.senderName}</td>
+                    <td class="text-center">${item.recipientId}</td>
+                    <td>${item.recipientName}</td>
+                    <td class="text-end">${item.transferAmount}</td>
+                    <td class="text-end">${item.fees}</td>
+                    <td class="text-end">${item.feesAmount}</td>
+                    <td class="text-end">${creationDate}</td>
+                </tr>`
+
+            $("#tb-transfer-info tbody").prepend(str);
+
+            totalFeesAmount += item.feesAmount;
+        })
+
+        $("#totalFeesAmount").text(totalFeesAmount);
+    })
 </script>
 </body>
 

@@ -69,6 +69,8 @@ public class TransferService implements ITransferService{
         Transfer newTransfer = transferDTO.toTransfer(transferDTO, sender, recipient);
         newTransfer.setFeesAmount(feesAmount);
         newTransfer.setTransactionAmount(totalTransactionAmount);
+        newTransfer.setFees(fees);
+        transferRepository.save(newTransfer);
 
     }
 

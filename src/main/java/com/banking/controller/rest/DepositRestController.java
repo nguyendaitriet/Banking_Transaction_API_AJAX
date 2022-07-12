@@ -35,7 +35,7 @@ public class DepositRestController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> deposit(@PathVariable String id,
-                                     @Validated @RequestBody DepositDTO depositDTO,
+                                     @RequestBody DepositDTO depositDTO,
                                      BindingResult bindingResult) {
 
         if (ParsingValidationUtils.isLongParsable(id)) {
